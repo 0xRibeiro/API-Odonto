@@ -27,7 +27,7 @@ jobs:
           distribution: temurin
 
       - name: Compilar e testar
-        working-directory: ./api-odonto
+        working-directory: .
         run: mvn -B clean verify
 
       - name: Construir imagem Docker
