@@ -1,3 +1,4 @@
+
 name: Agendamento Odontologico CI/CD
 
 on:
@@ -13,11 +14,6 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
 
-    # Executa os comandos "run" dentro da pasta do projeto.
-    defaults:
-      run:
-        working-directory: .
-
     steps:
       - name: Baixar o codigo
         uses: actions/checkout@v4
@@ -28,20 +24,18 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-
-          # O caminho do cache é relativo à raiz do repositório.
-          cache-dependency-path: ./pom.xml
+          cache-dependency-path: pom.xml
 
       - name: Permitir execucao do Maven Wrapper
         run: chmod +x mvnw
 
       - name: Executar testes e gerar o pacote
         env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SPRING_DATASOURCE_URL: ${{ secrets.DB_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          API_SECURITY_TOKEN_SECRET: ${{ secrets.JWT_SECRET }}
         run: ./mvnw --batch-mode clean verify
 
       - name: Validar a imagem Docker
-        run: docker build -f Dockerfile -t agendamento-odontologico:${{ github.sha }} .
+        run: docker build -t agendamento-odontologico:${{ github.sha }} .
