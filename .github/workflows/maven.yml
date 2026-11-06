@@ -31,4 +31,4 @@ jobs:
         run: mvn -B clean verify
 
       - name: Construir imagem Docker
-        run: docker build -f Dockerfile -t agendamento-odontologico:${{ github.sha }} ./api-odonto
+        run: docker build -f Dockerfile -t agendamento-odontologico:${{ github.sha }} .
