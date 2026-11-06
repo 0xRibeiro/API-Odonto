@@ -1,7 +1,16 @@
-- name: Executar testes e gerar o pacote
-  env:
-    DB_URL: ${{ secrets.DB_URL }}
-    DB_USERNAME: ${{ secrets.DB_USERNAME }}
-    DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-    JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  run: ./mvnw --batch-mode clean verify
+name: Agendamento Odontologico CI/CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Executar testes e gerar o pacote
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: ./mvnw --batch-mode clean verify
