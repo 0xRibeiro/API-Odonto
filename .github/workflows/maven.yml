@@ -1,34 +1,47 @@
-
 name: Agendamento Odontologico CI/CD
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-  push: { branches: [main] }
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  test-and-build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-
-    env:
-      SPRING_DATASOURCE_URL: ${{ secrets.DB_URL }}
-      SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USERNAME }}
-      SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      API_SECURITY_TOKEN_SECRET: ${{ secrets.JWT_SECRET }}
+    # Executa os comandos "run" dentro da pasta do projeto.
+    defaults:
+      run:
+        working-directory: .
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
         with:
-          java-version: '21'
           distribution: temurin
+          java-version: "21"
+          cache: maven
 
-      - name: Compilar e testar
-        working-directory: .
-        run: mvn -B clean verify
+          # O caminho do cache é relativo à raiz do repositório.
+          cache-dependency-path: api-odonto/pom.xml
 
-      - name: Construir imagem Docker
-        run: docker build -f Dockerfile -t agendamento-odontologico:${{ github.sha }} .
+      - name: Permitir execucao do Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Executar testes e gerar o pacote
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: ./mvnw --batch-mode clean verify
+
+      - name: Validar a imagem Docker
+        run: docker build -t agendamento-odontologico:${{ github.sha }} .
